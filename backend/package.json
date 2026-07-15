@@ -1,0 +1,10 @@
+{
+  "name": "finlit-sim-backend-helpers",
+  "version": "1.0.0",
+  "description": "Helper scripts for fetching market data using yahoo-finance2",
+  "main": "fetch_market.js",
+  "type": "module",
+  "dependencies": {
+    "yahoo-finance2": "^2.13.0"
+  }
+}
