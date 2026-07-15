@@ -62,15 +62,16 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
-            <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2">Email Address</label>
+            <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2">Email Address or Username</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
               <input
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="Enter your email or username"
+
                 className="w-full pl-12 pr-4 py-3 bg-[#0a0f1d] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
               />
             </div>

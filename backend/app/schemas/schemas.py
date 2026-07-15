@@ -4,12 +4,13 @@ from datetime import datetime, date
 
 # Auth Schemas
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str = Field(..., min_length=3, description="Email or Username")
     password: str = Field(..., min_length=6)
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str = Field(..., description="Email or Username")
     password: str
+
 
 class Token(BaseModel):
     access_token: str
