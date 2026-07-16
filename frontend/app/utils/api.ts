@@ -66,15 +66,15 @@ function handleClientFallback(endpoint: string, options: RequestInit): any {
 
   // Auth endpoints
   if (endpoint.startsWith("/auth/signup")) {
-    const { email } = body;
-    setLocalStorage("mock_user", { email });
+    const { email: username } = body;
+    setLocalStorage("mock_user", { username });
     localStorage.setItem("token", "mock-token-xyz");
     return { access_token: "mock-token-xyz", token_type: "bearer" };
   }
   
   if (endpoint.startsWith("/auth/login")) {
-    const { email } = body;
-    setLocalStorage("mock_user", { email });
+    const { email: username } = body;
+    setLocalStorage("mock_user", { username });
     localStorage.setItem("token", "mock-token-xyz");
     return { access_token: "mock-token-xyz", token_type: "bearer" };
   }
@@ -84,10 +84,10 @@ function handleClientFallback(endpoint: string, options: RequestInit): any {
     const profile = getLocalStorage("mock_profile", null);
     if (!profile) {
       // Simulate profile if onboarding is complete
-      const user = getLocalStorage("mock_user", { email: "Guest" });
+      const user = getLocalStorage("mock_user", { username: "Guest" });
       return {
         user_id: 1,
-        full_name: user.email,
+        full_name: user.username,
         employment_status: "Salaried",
         annual_salary: 800000,
         financial_objectives: ["Wealth Creation"],
@@ -419,10 +419,10 @@ function handleClientFallback(endpoint: string, options: RequestInit): any {
 
 export const api = {
   // Auth
-  async signup(email: string, password: string) {
+  async signup(username: string, password: string) {
     const data = await fetchWithAuth("/auth/signup", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: username, password }),
     });
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
@@ -430,10 +430,10 @@ export const api = {
     return data;
   },
 
-  async login(email: string, password: string) {
+  async login(username: string, password: string) {
     const data = await fetchWithAuth("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: username, password }),
     });
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);

@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "../utils/api";
-import { TrendingUp, Mail, Lock } from "lucide-react";
+import { TrendingUp, User as UserIcon, Lock } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      await api.login(email, password);
+      await api.login(username, password);
       // Check if profile exists, if not redirect to onboarding
       try {
         await api.getProfile();
@@ -31,7 +31,7 @@ export default function LoginPage() {
         router.push("/onboarding");
       }
     } catch (err: any) {
-      setError(err.message || "Invalid email or password.");
+      setError(err.message || "Invalid username or password.");
     } finally {
       setLoading(false);
     }
@@ -60,15 +60,15 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2">Email Address or Username</label>
+            <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2">Username</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
               <input
                 type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email or username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
 
                 className="w-full pl-12 pr-4 py-3 bg-[#0a0f1d] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
               />
