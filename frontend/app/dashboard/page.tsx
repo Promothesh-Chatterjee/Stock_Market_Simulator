@@ -115,12 +115,14 @@ export default function DashboardPage() {
 
   // Fetch calendar details when date changes
   const loadCalendarDetails = async () => {
+    if (!selectedDate || selectedDate === "undefined" || selectedDate === "") return;
     setCalendarLoading(true);
     setSearchStockChart([]);
     setSearchStockTicker("");
     setSearchStockError("");
     try {
       const details = await api.getCalendarDetails(selectedDate);
+
       setCalendarDetails(details);
     } catch (err) {
       console.error("Error loading calendar details:", err);
