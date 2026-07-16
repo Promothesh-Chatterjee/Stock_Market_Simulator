@@ -191,10 +191,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050814] flex text-slate-100 overflow-x-hidden w-full">
+    <div className="min-h-screen bg-[#050814] flex text-slate-100">
       <Sidebar />
 
-      <div className="flex-1 pl-64 min-h-screen flex flex-col">
+      <div className="flex-1 ml-64 min-w-0 min-h-screen flex flex-col">
         <Header onChatToggle={() => setShowChat(!showChat)} showChat={showChat} />
 
         <main className="mt-20 flex-1 p-8 space-y-6">

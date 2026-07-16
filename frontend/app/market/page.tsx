@@ -86,9 +86,9 @@ export default function MarketPage() {
     const fetchSuggestions = async () => {
       try {
         const res = await api.searchStocks(query);
-        const matches = res.slice(0, 10).map((s: any) => ({
-          symbol: s.ticker,
-          name: s.name || s.shortName || s.longName || s.ticker
+        const matches = res.slice(0, 10).map((s: any, idx: number) => ({
+          symbol: s.symbol || s.ticker || `search-result-${idx}`,
+          name: s.name || s.shortName || s.longName || s.symbol || s.ticker
         }));
         setSuggestions(matches);
       } catch (err) {}
@@ -130,10 +130,10 @@ export default function MarketPage() {
   const priceColor = getPriceColor(change);
 
   return (
-    <div className="min-h-screen bg-[#050814] flex text-slate-100 overflow-x-hidden w-full">
+    <div className="min-h-screen bg-[#050814] flex text-slate-100">
       <Sidebar />
       
-      <div className="flex-1 pl-64 min-h-screen flex flex-col">
+      <div className="flex-1 ml-64 min-w-0 min-h-screen flex flex-col">
         <Header onChatToggle={() => setShowChat(!showChat)} showChat={showChat} />
         
         <main className="mt-20 flex-1 p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -142,8 +142,25 @@ export default function MarketPage() {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Search and Autocomplete Header */}
-            <div className="relative">
-              <div className="relative flex items-center">
+            <div className="relative z-50">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (suggestions.length > 0) {
+                    let sym = suggestions[0].symbol;
+                    if (!sym.includes('.')) sym += '.NS';
+                    setSelectedTicker(sym);
+                    setQuery("");
+                    setSuggestions([]);
+                  } else if (query.trim()) {
+                    let sym = query.trim().toUpperCase();
+                    if (!sym.includes('.')) sym += '.NS';
+                    setSelectedTicker(sym);
+                    setQuery("");
+                  }
+                }}
+                className="relative flex items-center"
+              >
                 <Search className="absolute left-4 h-5 w-5 text-slate-500" />
                 <input
                   type="text"
@@ -152,15 +169,17 @@ export default function MarketPage() {
                   placeholder="Search NSE/BSE stocks (e.g. MRF, Reliance, TCS)..."
                   className="w-full bg-[#111827] border border-slate-800 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"
                 />
-              </div>
+              </form>
 
               {suggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 bg-[#111827] border border-slate-800 rounded-xl mt-2 overflow-hidden shadow-2xl z-30">
-                  {suggestions.map((s) => (
+                  {suggestions.map((s, idx) => (
                     <button
-                      key={s.symbol}
+                      key={s.symbol || idx}
                       onClick={() => {
-                        setSelectedTicker(s.symbol);
+                        let sym = s.symbol;
+                        if (!sym.includes('.')) sym += '.NS';
+                        setSelectedTicker(sym);
                         setQuery("");
                         setSuggestions([]);
                       }}
