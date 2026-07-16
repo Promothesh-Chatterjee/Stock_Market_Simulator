@@ -145,6 +145,22 @@ function handleClientFallback(endpoint: string, options: RequestInit): any {
     });
   }
 
+  if (endpoint.startsWith("/market/search")) {
+    const params = new URLSearchParams(endpoint.split("?")[1] || "");
+    const query = (params.get("query") || "").toLowerCase();
+    const results = Object.keys(MOCK_STOCK_PRICES).filter(t => t.toLowerCase().includes(query)).map(ticker => {
+      const price = MOCK_STOCK_PRICES[ticker];
+      return {
+        ticker,
+        price,
+        change: price * 0.005,
+        change_percent: 0.5,
+        name: ticker.replace(".NS", "")
+      };
+    });
+    return results.length ? results : [{ ticker: "RELIANCE.NS", name: "Reliance", price: 2510, change: 12.5, change_percent: 0.5 }];
+  }
+
   if (endpoint.startsWith("/market/news")) {
     return [
       { headline: "Market Sandbox Mode active: Backend is offline, running on client-side simulation store.", source: "System", url: "#", published_at: new Date() },
@@ -175,7 +191,16 @@ function handleClientFallback(endpoint: string, options: RequestInit): any {
       losers: [
         { ticker: "TCS.NS", name: "TCS", price: 3820, change_percent: -1.25 }
       ],
-      user_trades: getLocalStorage("mock_txs", []).filter((t: any) => t.created_at.startsWith(dateStr)),
+      user_trades: getLocalStorage("mock_txs", [])
+        .filter((t: any) => t.created_at.startsWith(dateStr))
+        .map((t: any) => ({
+          ticker: t.ticker,
+          type: t.transaction_type,
+          quantity: t.quantity,
+          price: t.price,
+          amount: t.total_amount,
+          score: t.score
+        })),
       user_pnl_summary: { total_invested: 0, pnl: 0, pnl_percent: 0 }
     };
   }
@@ -476,6 +501,10 @@ export const api = {
 
   async getNews() {
     return fetchWithAuth("/market/news");
+  },
+
+  async searchStocks(query: string) {
+    return fetchWithAuth(`/market/search?query=${encodeURIComponent(query)}`);
   },
 
   // Calendar

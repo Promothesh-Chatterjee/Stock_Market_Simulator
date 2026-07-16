@@ -65,6 +65,7 @@ export default function OnboardingPage() {
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<string[]>(Array(5).fill(""));
   const [startingCapital, setStartingCapital] = useState<number>(1000000); // 10 Lakhs default
+  const [isCustomCapital, setIsCustomCapital] = useState(false);
   
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -125,6 +126,11 @@ export default function OnboardingPage() {
         return;
       }
       setStep(4);
+    } else if (step === 4) {
+      if (startingCapital < 10000 || startingCapital > 1000000000) {
+        setError("Custom capital must be between ₹10,000 and ₹100 Crores.");
+        return;
+      }
     }
   };
 
@@ -341,26 +347,54 @@ export default function OnboardingPage() {
               <p className="text-slate-400 text-sm mt-1">Choose the size of your virtual risk-free starting capital.</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[1000000, 5000000, 10000000].map((cap) => {
-                const isSelected = startingCapital === cap;
+                const isSelected = startingCapital === cap && !isCustomCapital;
                 return (
                   <button
                     key={cap}
                     type="button"
-                    onClick={() => setStartingCapital(cap)}
-                    className={`p-4 rounded-xl border text-center transition flex flex-col items-center justify-center ${
+                    onClick={() => { setStartingCapital(cap); setIsCustomCapital(false); }}
+                    className={`p-3 rounded-xl border text-center transition flex flex-col items-center justify-center ${
                       isSelected 
                         ? "bg-blue-600/10 border-blue-500 text-white ring-1 ring-blue-500" 
                         : "bg-[#0a0f1d] border-slate-800 text-slate-400 hover:border-slate-700"
                     }`}
                   >
-                    <span className="text-lg font-bold text-white">{formatINR(cap)}</span>
-                    <span className="text-[10px] uppercase text-slate-500 tracking-wider mt-1">Virtual Cash</span>
+                    <span className="text-sm font-bold text-white">{formatINR(cap)}</span>
+                    <span className="text-[9px] uppercase text-slate-500 tracking-wider mt-1">Preset</span>
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => setIsCustomCapital(true)}
+                className={`p-3 rounded-xl border text-center transition flex flex-col items-center justify-center ${
+                  isCustomCapital 
+                    ? "bg-blue-600/10 border-blue-500 text-white ring-1 ring-blue-500" 
+                    : "bg-[#0a0f1d] border-slate-800 text-slate-400 hover:border-slate-700"
+                }`}
+              >
+                <span className="text-sm font-bold text-white">Custom</span>
+                <span className="text-[9px] uppercase text-slate-500 tracking-wider mt-1">Enter Amount</span>
+              </button>
             </div>
+
+            {isCustomCapital && (
+              <div className="animate-pop-in mt-4">
+                <label className="block text-slate-300 text-xs font-semibold uppercase tracking-wider mb-2">Enter Custom Capital (INR)</label>
+                <input
+                  type="number"
+                  value={startingCapital || ""}
+                  onChange={(e) => setStartingCapital(Number(e.target.value))}
+                  placeholder="e.g. 150000"
+                  min={10000}
+                  max={1000000000}
+                  className="w-full px-4 py-3 bg-[#0a0f1d] border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-mono"
+                />
+                <p className="text-xs text-slate-500 mt-2">Min: ₹10,000 | Max: ₹100 Crores</p>
+              </div>
+            )}
 
             <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-xl space-y-4">
               <h4 className="text-sm font-semibold text-white">Summary of your Investor Profile</h4>

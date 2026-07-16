@@ -6,6 +6,8 @@ import {
   Calendar as CalendarIcon, Search, Landmark, Award, BookOpen, AlertCircle
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import { api } from "../utils/api";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
@@ -31,6 +33,7 @@ export default function DashboardPage() {
   const [searchStockError, setSearchStockError] = useState("");
 
   const [showChat, setShowChat] = useState(false);
+  const [showCalendarPopup, setShowCalendarPopup] = useState(false);
 
   // WebSocket / Polling for Live index prices
   useEffect(() => {
@@ -188,7 +191,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050814] flex text-slate-100">
+    <div className="min-h-screen bg-[#050814] flex text-slate-100 overflow-x-hidden w-full">
       <Sidebar />
 
       <div className="flex-1 pl-64 min-h-screen flex flex-col">
@@ -303,12 +306,28 @@ export default function DashboardPage() {
               </div>
               
               <div className="relative">
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-[#0a0f1d] border border-slate-850 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                />
+                <button
+                  type="button"
+                  onClick={() => setShowCalendarPopup(!showCalendarPopup)}
+                  className="bg-[#0a0f1d] border border-slate-850 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 flex items-center gap-2"
+                >
+                  <CalendarIcon className="w-4 h-4 text-blue-500" />
+                  {selectedDate ? new Date(selectedDate).toLocaleDateString('en-GB') : "Select Date"}
+                </button>
+                {showCalendarPopup && (
+                  <div className="absolute top-full mt-2 right-0 z-50 bg-white text-black p-2 rounded-xl shadow-2xl">
+                    <Calendar 
+                      onChange={(val: any) => {
+                        let d = new Date(val);
+                        const offset = d.getTimezoneOffset();
+                        d = new Date(d.getTime() - (offset*60*1000));
+                        setSelectedDate(d.toISOString().split('T')[0]);
+                        setShowCalendarPopup(false);
+                      }} 
+                      value={new Date(selectedDate)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

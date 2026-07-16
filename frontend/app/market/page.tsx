@@ -85,12 +85,11 @@ export default function MarketPage() {
     }
     const fetchSuggestions = async () => {
       try {
-        const res = await api.getQuotes([query]);
-        // Simple client filtering Nifty tickers
-        const matches = POPULAR_TICKERS.filter(
-          t => t.symbol.toLowerCase().includes(query.toLowerCase()) || 
-               t.name.toLowerCase().includes(query.toLowerCase())
-        );
+        const res = await api.searchStocks(query);
+        const matches = res.slice(0, 10).map((s: any) => ({
+          symbol: s.ticker,
+          name: s.name || s.shortName || s.longName || s.ticker
+        }));
         setSuggestions(matches);
       } catch (err) {}
     };
@@ -131,7 +130,7 @@ export default function MarketPage() {
   const priceColor = getPriceColor(change);
 
   return (
-    <div className="min-h-screen bg-[#050814] flex text-slate-100">
+    <div className="min-h-screen bg-[#050814] flex text-slate-100 overflow-x-hidden w-full">
       <Sidebar />
       
       <div className="flex-1 pl-64 min-h-screen flex flex-col">

@@ -71,6 +71,10 @@ def get_quotes(tickers: Optional[str] = None):
             
     return quotes
 
+@router.get("/search")
+def search_stocks(query: str = Query(..., description="Search query")):
+    return YahooFinanceService.search_ticker(query)
+
 @router.get("/news", response_model=List[NewsArticle])
 def get_news(db: Session = Depends(get_db)):
     cache_key = "news_articles"
@@ -252,34 +256,47 @@ def get_calendar_details(
                 "close": quotes[0]["close"]
             }
 
-    # Generate Gainers & Losers (Deterministic for that day based on seed)
-    # Seed based on date hash so it doesn't change on refresh
-    import random
-    rng = random.Random(query_date.toordinal())
-    
+    # Generate Gainers & Losers (Real for today, deterministic mock for history)
     gainers = []
     losers = []
     
-    stock_names = {
-        "RELIANCE.NS": "Reliance Industries", "TCS.NS": "TCS", "INFY.NS": "Infosys",
-        "HDFCBANK.NS": "HDFC Bank", "ICICIBANK.NS": "ICICI Bank", "SBIN.NS": "State Bank of India",
-        "ITC.NS": "ITC Ltd", "MRF.NS": "MRF Ltd", "CEAT.NS": "CEAT Ltd", "BOSCHLTD.NS": "Bosch Ltd"
-    }
-    
-    all_stocks = list(stock_names.items())
-    rng.shuffle(all_stocks)
-    
-    for symbol, name in all_stocks[:5]:
-        gain = rng.uniform(0.5, 4.5)
-        gainers.append({"ticker": symbol, "name": name, "price": rng.uniform(500, 5000), "change_percent": gain})
+    if query_date == ist_now.date():
+        all_quotes = []
+        for t in NIFTY_TICKERS:
+            q = YahooFinanceService.get_quote(t)
+            if "error" not in q:
+                all_quotes.append({
+                    "ticker": t,
+                    "name": q.get("shortName") or q.get("displayName") or t,
+                    "price": q.get("regularMarketPrice", 0),
+                    "change_percent": q.get("regularMarketChangePercent", 0)
+                })
+        all_quotes.sort(key=lambda x: x["change_percent"], reverse=True)
+        if len(all_quotes) > 0:
+            gainers = all_quotes[:5]
+            losers = all_quotes[-5:]
+            losers.reverse()
+    else:
+        import random
+        rng = random.Random(query_date.toordinal())
+        stock_names = {
+            "RELIANCE.NS": "Reliance Industries", "TCS.NS": "TCS", "INFY.NS": "Infosys",
+            "HDFCBANK.NS": "HDFC Bank", "ICICIBANK.NS": "ICICI Bank", "SBIN.NS": "State Bank of India",
+            "ITC.NS": "ITC Ltd", "MRF.NS": "MRF Ltd", "CEAT.NS": "CEAT Ltd", "BOSCHLTD.NS": "Bosch Ltd"
+        }
+        all_stocks = list(stock_names.items())
+        rng.shuffle(all_stocks)
         
-    for symbol, name in all_stocks[5:10]:
-        loss = rng.uniform(-4.5, -0.5)
-        losers.append({"ticker": symbol, "name": name, "price": rng.uniform(500, 5000), "change_percent": loss})
+        for symbol, name in all_stocks[:5]:
+            gain = rng.uniform(0.5, 4.5)
+            gainers.append({"ticker": symbol, "name": name, "price": rng.uniform(500, 5000), "change_percent": gain})
+            
+        for symbol, name in all_stocks[5:10]:
+            loss = rng.uniform(-4.5, -0.5)
+            losers.append({"ticker": symbol, "name": name, "price": rng.uniform(500, 5000), "change_percent": loss})
 
-    # Sort
-    gainers.sort(key=lambda x: x["change_percent"], reverse=True)
-    losers.sort(key=lambda x: x["change_percent"])
+        gainers.sort(key=lambda x: x["change_percent"], reverse=True)
+        losers.sort(key=lambda x: x["change_percent"])
 
     # Query user trades for this date
     # Convert query_date to start/end datetime

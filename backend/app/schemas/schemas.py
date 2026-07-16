@@ -26,7 +26,7 @@ class UserProfileCreate(BaseModel):
     annual_salary: float = 0.0
     financial_objectives: List[str]
     risk_appetite: str  # Conservative, Moderate, Aggressive
-    starting_capital: float = Field(1000000.0, description="Virtual cash budget in INR")
+    starting_capital: float = Field(1000000.0, ge=10000.0, le=1000000000.0, description="Virtual cash budget in INR")
 
 class UserProfileResponse(BaseModel):
     user_id: int
