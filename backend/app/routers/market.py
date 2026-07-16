@@ -163,7 +163,8 @@ def get_news(db: Session = Depends(get_db)):
 
 @router.get("/calendar", response_model=CalendarCheckResponse)
 def get_calendar_details(
-    date_str: str = Query(..., description="Date in YYYY-MM-DD format"),
+    date_str: str = Query(..., alias="date", description="Date in YYYY-MM-DD format"),
+
     db: Session = Depends(get_db)
 ):
     try:
@@ -328,7 +329,8 @@ def get_calendar_details(
 @router.get("/calendar/chart")
 def get_calendar_stock_chart(
     ticker: str = Query(..., description="Stock ticker"),
-    date_str: str = Query(..., description="Selected date")
+    date_str: str = Query(..., alias="date", description="Selected date")
+
 ):
     # Returns historical chart for selected stock surrounding the selected date (+/- 5 days)
     try:
